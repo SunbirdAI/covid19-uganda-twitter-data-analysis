@@ -2,8 +2,7 @@ venv/
 .ipynb_checkpoints/
 .env
 .idea
-mask_tweets.json
-mask_tweets_v4.json
-mask_tweetsv3.json
+*.json
 *.csv
 __pycache__/
+*.log

@@ -16,7 +16,7 @@ def get_more_results(tweets):
     while True:
         print("Number of tweets so far: ", len(statuses) + tweets_retrieved)
         if len(statuses) >= 100:
-            save_tweets_to_mongodb(statuses)
+            save_tweets_to_mongodb(statuses, _govt_mask_tweets)
             tweets_retrieved += len(statuses)
             statuses = []
         try:
@@ -38,7 +38,7 @@ def get_more_results(tweets):
             break
 
     if len(statuses) > 0:
-        save_tweets_to_mongodb(statuses)
+        save_tweets_to_mongodb(statuses, _govt_mask_tweets)
     print("Number of requests before no results: ", num_of_requests_made + 1)
 
 
@@ -51,8 +51,8 @@ def get_tweets(query_string):
     print("Finished retrieving '{}' tweets".format(query_string))
 
 
-def save_tweets_to_mongodb(statuses):
-    result = _mask_tweets.insert_many(statuses)
+def save_tweets_to_mongodb(statuses, collection):
+    result = collection.insert_many(statuses)
     print("Result of insert: {0}".format(result.inserted_ids))
 
 
@@ -61,16 +61,27 @@ if __name__ == '__main__':
     twitter_api = setup_twitter_api(retry=True)
 
     # Setup MongoDB
-    _mask_tweets = get_mongo_db_collection('twitter_db', 'mask_tweets')
+    # _mask_tweets = get_mongo_db_collection('twitter_db', 'mask_tweets')
+    _govt_mask_tweets = get_mongo_db_collection('twitter_db', 'govt_mask_tweets')
 
     # Run query
-    words_list = ["mask", "masks"]
-    hashtags_list = ["#m7address", "#covid19ug", "#covid19UG", "#COVID19UG", "#StaySafeUG"]
-    accounts_list = ["from:MinOfHealthUG", "from:newvisionwire", "from:nbstv", "from:KagutaMuseveni"]
+    # words_list = ["mask", "masks"]
+    # hashtags_list = ["#m7address", "#covid19ug", "#covid19UG", "#COVID19UG", "#StaySafeUG"]
+    # accounts_list = ["from:MinOfHealthUG", "from:newvisionwire", "from:nbstv", "from:KagutaMuseveni"]
     # locations_list = ["place:Uganda", "bio_location:Kampala"]
 
-    _date_range = {"since": "2020-05-17", "until": "2020-05-25"}
+    # words_list = ["uganda government mask"]
+    # hashtags_list = ["#covid19", "#COVID19"]
+    # accounts_list = []
 
-    _query_string = create_query_string([words_list, hashtags_list, accounts_list], _date_range)
+    # _date_range = {"since": "2020-08-3", "until": "2020-08-14"}
+
+    # _query_string = create_query_string([words_list], _date_range)
+    _query_string = "place:939067979a7f3b95 since:2020-08-18 -is:retweet"
     print("Query: ", _query_string)
     get_tweets(_query_string)
+    # result = twitter_api.geo.search(query="UG", granularity="country")
+    # print(result)
+    # place_id = result['result']['places'][0]['id']
+    # print(place_id)
+    # Uganda ID: 939067979a7f3b95
