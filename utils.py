@@ -12,10 +12,12 @@ def setup_twitter_api(retry=False):
     # Setup Twitter API
     load_dotenv()
 
+    consumer_key = os.getenv("TWITTER_ACCESS_TOKEN")
+    consumer_secret = os.getenv("TWITTER_TOKEN_SECRET")
     api_key = os.getenv("TWITTER_API_KEY")
     api_secret = os.getenv("TWITTER_API_SECRET")
 
-    auth = twitter.oauth.OAuth("", "", api_key, api_secret)
+    auth = twitter.oauth.OAuth(consumer_key, consumer_secret, api_key, api_secret)
 
     return twitter.Twitter(auth=auth, retry=False)
 

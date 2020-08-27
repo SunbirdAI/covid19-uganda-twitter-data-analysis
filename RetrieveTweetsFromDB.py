@@ -45,12 +45,25 @@ def get_words(_collection):
     for tweet in cursor:
         if 'retweeted_status' in tweet:
             tweet_texts.append(get_tweet_text(tweet['retweeted_status']))
+            # print("\n{}\n".format(get_tweet_text(tweet['retweeted_status'])))
         else:
             tweet_texts.append(get_tweet_text(tweet))
+            text = get_tweet_text(tweet)
+            # if "…" in text:
+            #     print(tweet)
+            # print("\n{}\n".format(get_tweet_text(tweet)))
 
     print(len(tweet_texts))
 
     return [word for text in tweet_texts for word in text.split()]
+
+
+def get_usernames(_collection):
+    cursor = _collection.find()
+    tweet_usernames = []
+    for tweet in cursor:
+        tweet_usernames.append("{} {}".format(tweet["user"]["name"], tweet["user"]["screen_name"]))
+    return tweet_usernames
 
 
 def print_frequency_table(label, data):
@@ -76,14 +89,16 @@ if __name__ == '__main__':
     # Setup db
     client = MongoClient('localhost', 27017)
     db = client['twitter_db']
+    collection = db.govt_mask_tweets
 
     # How many tweets are in the db and how many distinct users
-    get_tweets_from_db(db.mask_tweets)
-    how_many_users(db.mask_tweets)
+    get_tweets_from_db(collection)
+    how_many_users(collection)
 
     # Frequency analysis of words and hashtags
-    print_frequency_table('Hashtag', get_hashtags(db.mask_tweets))
-    print_frequency_table('Word', get_words(db.mask_tweets))
+    print_frequency_table('Hashtag', get_hashtags(collection))
+    print_frequency_table('Word', get_words(collection))
+    print_frequency_table('Username', get_usernames(collection))
 
-    # Write to json file
-    write_to_json(db.mask_tweets)
+    # # Write to json file
+    # write_to_json(db.mask_tweets)
