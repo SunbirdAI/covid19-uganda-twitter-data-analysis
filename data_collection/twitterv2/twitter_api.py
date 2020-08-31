@@ -45,18 +45,18 @@ def filter_ugandan_users(users):
     return ugandan_users
 
 
-def create_query(users=None, conversation_id=None, entities=None):
+def create_query(users=None, conversation_ids=None, entities=None):
     """
     Creates the query string depending on the parameters given.
     :param users: list of users whose tweets to get.
-    :param conversation_id: the id of the conversation from which to get tweets
+    :param conversation_ids: the id of the conversation from which to get tweets
     :param entities: a list of entities (such as hashtags or annotations)
     :return: the query string
     """
     if users is not None:
         return " OR ".join("from:{}".format(user) for user in users) + " -is:retweet"
-    if conversation_id is not None:
-        return "conversation_id:{} -is:retweet".format(conversation_id)
+    if conversation_ids is not None:
+        return " OR ".join("conversation_id:{}".format(conv_id) for conv_id in conversation_ids) + " -is:retweet"
     if entities is not None:
         return " OR ".join("entity:{}".format(entity) for entity in entities)
     return ""
@@ -83,15 +83,18 @@ def fetch_records(url, record_type="tweets"):
         if "data" in json_response:
             records.extend(json_response["data"])
         if len(records) >= 100:
+            records_saved = 0
             records_retrieved += len(records)
             if record_type == "tweets":
                 conversation_ids.update(extract_conversation_ids(records))
                 user_ids.update(extract_author_ids(records))
-                save_records(records, record_type)
+                records_saved += save_records(records, record_type)
             else:
                 ugandans = filter_ugandan_users(records)
-                save_records(ugandans, record_type)
+                records_saved += save_records(ugandans, record_type)
             records = []
+            if records_saved == 0:
+                break
         if "meta" in json_response and "next_token" in json_response["meta"]:
             new_url = url + "&next_token={}".format(json_response["meta"]["next_token"])
             json_response, status_code = connect_to_endpoint(new_url, headers)

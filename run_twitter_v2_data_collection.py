@@ -3,8 +3,8 @@ from data_collection.twitterv2.twitter_api import fetch_records, create_users_ur
 import time
 
 
-def fetch_by_conversation_id(conversation_id):
-    query = create_query(conversation_id=conversation_id)
+def fetch_by_conversation_id(conv_ids):
+    query = create_query(conversation_ids=conv_ids)
     url = create_tweets_url(query)
     result = fetch_records(url, "tweets")
     return result
@@ -39,31 +39,51 @@ if __name__ == '__main__':
 
     while True:
         # Fetch tweets by random users
+        print("Collecting tweets from random users....")
         user_list = random_15_users()
         response = fetch_by_random_users(user_list)
-        while response[3] == 429:
+        while response[3] == 429 and response[0] == 0:
             # wait for 10 minutes and then make the request again. (This is because the rate limit will
             # have been reached)
             print("Rate limit exceeded, waiting for 10 minutes")
             time.sleep(600)
             response = fetch_by_random_users(user_list)
 
-        conversation_ids = response[1]
-        print("Number of Conversation ids retrieved: {}".format(len(list(conversation_ids))))
+        conversation_ids = list(response[1])
+        print("Number of Conversation ids retrieved: {}".format(len(conversation_ids)))
 
         # Fetch replies to the new conversation ids
+        print("Collecting tweets/replies by the conversation ids...")
         author_ids = set()
-        for conv_id in conversation_ids:
-            response = fetch_by_conversation_id(conv_id)
-            while response[3] == 429:
+        start_index = 0
+        max_ids = 10
+        while start_index < len(conversation_ids):
+            response = fetch_by_conversation_id(
+                conversation_ids[start_index:min(start_index + max_ids, len(conversation_ids))]
+            )
+            while response[3] == 429 and response[0] == 0:
                 print("Rate limit exceeded, waiting for 10 minutes")
                 time.sleep(600)
-                response = fetch_by_conversation_id(conv_id)
+                response = fetch_by_conversation_id(
+                    conversation_ids[start_index:min(start_index + max_ids, len(conversation_ids))]
+                )
+            start_index += max_ids
             author_ids.update(set(response[2]))
 
         # Save the new users
-        response = save_new_users(user_ids=list(author_ids))
-        while response[3] == 429:
-            print("Rate limit exceeded, waiting for 10 minutes")
-            time.sleep(600)
-            response = save_new_users(user_ids=author_ids)
+        if len(author_ids) > 0:
+            print("Saving the new users...")
+            author_ids = list(author_ids)
+            start_index = 0
+            max_users = 100
+            while start_index < len(author_ids):
+                response = save_new_users(
+                    user_ids=author_ids[start_index:min(start_index + max_users, len(author_ids))]
+                )
+                while response[3] == 429 and response[0] == 0:
+                    print("Rate limit exceeded, waiting for 10 minutes")
+                    time.sleep(600)
+                    response = save_new_users(
+                        user_ids=author_ids[start_index:min(start_index + max_users, len(author_ids))]
+                    )
+                start_index += max_users

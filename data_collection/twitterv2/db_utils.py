@@ -27,12 +27,14 @@ def insert_records(collection, records):
     :return: number of successful inserts
     """
     successful_inserts = 0
+    duplicates = 0
     for rec in records:
         try:
             collection.insert_one(rec)
             successful_inserts += 1
-        except errors.WriteError as e:
-            print("Error inserting record: {}".format(e))
+        except errors.WriteError as _:
+            duplicates += 1
+    print("Successful inserts: {} Duplicates: {}".format(successful_inserts, duplicates))
     return successful_inserts
 
 
@@ -42,7 +44,7 @@ def save_tweets(statuses):
     :param statuses: tweets to insert
     """
     tweets_collection = setup_collection(DATABASE_NAME, TWEETS_COLLECTION_NAME)
-    insert_records(tweets_collection, statuses)
+    return insert_records(tweets_collection, statuses)
 
 
 def save_users(users):
@@ -51,7 +53,7 @@ def save_users(users):
     :param users: the users to add
     """
     users_collection = setup_collection(DATABASE_NAME, USERS_COLLECTION_NAME)
-    insert_records(users_collection, users)
+    return insert_records(users_collection, users)
 
 
 def save_records(records, record_type):
@@ -61,9 +63,9 @@ def save_records(records, record_type):
     :param record_type: the type of record (either users or tweets)
     """
     if record_type == "tweets":
-        save_tweets(records)
+        return save_tweets(records)
     else:
-        save_users(records)
+        return save_users(records)
 
 
 def count_records(record_type):
