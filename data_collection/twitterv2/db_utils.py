@@ -66,6 +66,12 @@ def save_records(records, record_type):
         save_users(records)
 
 
+def count_records(record_type):
+    collection = setup_collection(DATABASE_NAME,
+                                  TWEETS_COLLECTION_NAME if record_type == "tweets" else USERS_COLLECTION_NAME)
+    return collection.count_documents({})
+
+
 def random_15_users():
     """
     Gets 15 random users from the database

@@ -73,25 +73,48 @@ def fetch_records(url, record_type="tweets"):
     headers = create_headers(bearer_token)
 
     records = []
+    conversation_ids = set()
+    user_ids = set()
     json_response = connect_to_endpoint(url, headers)
     records_retrieved = 0
     while True:
         records.extend(json_response["data"])
         if len(records) >= 100:
-            save_records(records, record_type)
-            records = []
             records_retrieved += len(records)
-        if "next_token" in json_response["meta"]:
+            if record_type == "tweets":
+                conversation_ids.union(extract_conversation_ids(records))
+                user_ids.union(extract_author_ids(records))
+                save_records(records, record_type)
+            else:
+                ugandans = filter_ugandan_users(records)
+                save_records(ugandans, record_type)
+            records = []
+        if "meta" in json_response and "next_token" in json_response["meta"]:
             new_url = url + "&next_token={}".format(json_response["meta"]["next_token"])
             json_response = connect_to_endpoint(new_url, headers)
         else:
             # TODO: Log number of requests made, and number of records collected (and type of record)
+            print("Records collected: {}".format(records_retrieved))
             break
 
     if len(records) > 0:
-        save_records(records, record_type)
         records_retrieved += len(records)
-    return records_retrieved
+        if record_type == "tweets":
+            conversation_ids.union(extract_conversation_ids(records))
+            user_ids.union(extract_author_ids(records))
+            save_records(records, record_type)
+        else:
+            ugandans = filter_ugandan_users(records)
+            save_records(ugandans, record_type)
+    return records_retrieved, conversation_ids, user_ids
+
+
+def extract_conversation_ids(tweets):
+    return set([tweet["conversation_id"] for tweet in tweets])
+
+
+def extract_author_ids(tweets):
+    return set([tweet["author_id"] for tweet in tweets])
 
 
 def connect_to_endpoint(url, headers):
