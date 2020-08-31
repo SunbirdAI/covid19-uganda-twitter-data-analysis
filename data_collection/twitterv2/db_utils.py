@@ -54,6 +54,18 @@ def save_users(users):
     insert_records(users_collection, users)
 
 
+def save_records(records, record_type):
+    """
+    Saves records to the db depending on the record type.
+    :param records: the records/documents to save
+    :param record_type: the type of record (either users or tweets)
+    """
+    if record_type == "tweets":
+        save_tweets(records)
+    else:
+        save_users(records)
+
+
 def random_15_users():
     """
     Gets 15 random users from the database
