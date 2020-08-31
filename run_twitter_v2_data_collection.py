@@ -41,7 +41,7 @@ if __name__ == '__main__':
         # Fetch tweets by random users
         user_list = random_15_users()
         response = fetch_by_random_users(user_list)
-        while response[0] == 0:
+        while response[3] == 429:
             # wait for 10 minutes and then make the request again. (This is because the rate limit will
             # have been reached)
             print("Rate limit exceeded, waiting for 10 minutes")
@@ -49,20 +49,21 @@ if __name__ == '__main__':
             response = fetch_by_random_users(user_list)
 
         conversation_ids = response[1]
-        author_ids = response[2]
-
-        # Save the new users
-        response = save_new_users(user_ids=author_ids)
-        while response[0] == 0:
-            print("Rate limit exceeded, waiting for 10 minutes")
-            time.sleep(600)
-            response = save_new_users(user_ids=author_ids)
+        print("Number of Conversation ids retrieved: {}".format(len(list(conversation_ids))))
 
         # Fetch replies to the new conversation ids
+        author_ids = set()
         for conv_id in conversation_ids:
             response = fetch_by_conversation_id(conv_id)
-            while response[0] == 0:
+            while response[3] == 429:
                 print("Rate limit exceeded, waiting for 10 minutes")
                 time.sleep(600)
                 response = fetch_by_conversation_id(conv_id)
+            author_ids.update(set(response[2]))
 
+        # Save the new users
+        response = save_new_users(user_ids=list(author_ids))
+        while response[3] == 429:
+            print("Rate limit exceeded, waiting for 10 minutes")
+            time.sleep(600)
+            response = save_new_users(user_ids=author_ids)

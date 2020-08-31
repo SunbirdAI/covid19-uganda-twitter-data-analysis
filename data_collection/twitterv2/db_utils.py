@@ -85,3 +85,11 @@ def random_15_users():
     for user in users_cursor:
         users.append(user['username'])
     return users
+
+
+def retrieve_tweets():
+    tweets_cursor = get_mongo_db_collection(DATABASE_NAME, TWEETS_COLLECTION_NAME).find()
+    tweets = []
+    for tweet in tweets_cursor:
+        tweets.append(tweet)
+    return tweets
