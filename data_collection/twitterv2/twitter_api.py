@@ -70,7 +70,7 @@ def create_tweets_url(query):
     return url
 
 
-def fetch_records(url, record_type="tweets"):
+def fetch_records(url, record_type="tweets", mode="collection"):
     bearer_token = auth()
     headers = create_headers(bearer_token)
 
@@ -88,10 +88,10 @@ def fetch_records(url, record_type="tweets"):
             if record_type == "tweets":
                 conversation_ids.update(extract_conversation_ids(records))
                 user_ids.update(extract_author_ids(records))
-                records_saved += save_records(records, record_type)
+                records_saved += save_records(records, record_type, mode)
             else:
                 ugandans = filter_ugandan_users(records)
-                records_saved += save_records(ugandans, record_type)
+                records_saved += save_records(ugandans, record_type, mode)
             records = []
             if records_saved == 0:
                 break
@@ -107,10 +107,10 @@ def fetch_records(url, record_type="tweets"):
         if record_type == "tweets":
             conversation_ids.update(extract_conversation_ids(records))
             user_ids.update(extract_author_ids(records))
-            save_records(records, record_type)
+            save_records(records, record_type, mode)
         else:
             ugandans = filter_ugandan_users(records)
-            save_records(ugandans, record_type)
+            save_records(ugandans, record_type, mode)
 
     print("Records collected: {}".format(records_retrieved))
 

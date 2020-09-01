@@ -5,6 +5,9 @@ DATABASE_NAME = "twitter_db"
 TWEETS_COLLECTION_NAME = "tweets_v2_collection"
 USERS_COLLECTION_NAME = "users_v2_collection"
 
+TARGETED_SEARCH_TWEETS_COLLECTION = "tweets_targeted"
+TARGETED_SEARCH_USERS_COLLECTION = "users_targeted"
+
 
 def setup_collection(db_name, collection_name):
     """
@@ -56,16 +59,27 @@ def save_users(users):
     return insert_records(users_collection, users)
 
 
-def save_records(records, record_type):
+def save_targeted_tweets(tweets):
+    tweets_col = setup_collection(DATABASE_NAME, TARGETED_SEARCH_TWEETS_COLLECTION)
+    return insert_records(tweets_col, tweets)
+
+
+def save_targeted_users(users):
+    users_col = setup_collection(DATABASE_NAME, TARGETED_SEARCH_USERS_COLLECTION)
+    return insert_records(users_col, users)
+
+
+def save_records(records, record_type, mode="collection"):
     """
     Saves records to the db depending on the record type.
     :param records: the records/documents to save
     :param record_type: the type of record (either users or tweets)
+    :param mode: the mode in which this function was called. Used to determine which collection
     """
     if record_type == "tweets":
-        return save_tweets(records)
+        return save_tweets(records) if mode == "collection" else save_targeted_tweets(records)
     else:
-        return save_users(records)
+        return save_users(records) if mode == "collection" else save_targeted_users(records)
 
 
 def count_records(record_type):

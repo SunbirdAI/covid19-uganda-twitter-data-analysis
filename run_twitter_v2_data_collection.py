@@ -3,10 +3,10 @@ from data_collection.twitterv2.twitter_api import fetch_records, create_users_ur
 import time
 
 
-def fetch_by_conversation_id(conv_ids):
+def fetch_by_conversation_id(conv_ids, mode="collection"):
     query = create_query(conversation_ids=conv_ids)
     url = create_tweets_url(query)
-    result = fetch_records(url, "tweets")
+    result = fetch_records(url, "tweets", mode=mode)
     return result
 
 
