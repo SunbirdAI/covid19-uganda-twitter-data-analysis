@@ -18,9 +18,9 @@ def fetch_by_random_users(users):
     return result
 
 
-def save_new_users(usernames=None, user_ids=None):
+def save_new_users(usernames=None, user_ids=None, mode="collection"):
     url = create_users_url(usernames=usernames, ids=user_ids)
-    return fetch_records(url, "users")
+    return fetch_records(url, "users", mode)
 
 
 def fetch_by_entity():

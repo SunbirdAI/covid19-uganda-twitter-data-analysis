@@ -103,9 +103,30 @@ def random_15_users():
     return users
 
 
-def retrieve_tweets():
-    tweets_cursor = get_mongo_db_collection(DATABASE_NAME, TWEETS_COLLECTION_NAME).find()
+def retrieve_tweets(mode="tweet"):
+    tweets_cursor = get_mongo_db_collection(
+        DATABASE_NAME,
+        TWEETS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_TWEETS_COLLECTION
+    ).find()
     tweets = []
     for tweet in tweets_cursor:
         tweets.append(tweet)
+    return tweets
+
+
+def fetch_user_by_id(user_id, mode="tweet"):
+    user_cursor = get_mongo_db_collection(
+        DATABASE_NAME,
+        USERS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_USERS_COLLECTION
+    ).find({'id': user_id})
+    users = [user for user in user_cursor]
+    return users
+
+
+def fetch_tweet_by_id(tweet_id, mode="tweet"):
+    tweet_cursor = get_mongo_db_collection(
+        DATABASE_NAME,
+        TWEETS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_TWEETS_COLLECTION
+    ).find({'id': tweet_id})
+    tweets = [tweet for tweet in tweet_cursor]
     return tweets

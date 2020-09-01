@@ -63,8 +63,8 @@ def create_query(users=None, conversation_ids=None, entities=None):
 
 
 def create_tweets_url(query):
-    tweet_fields = "tweet.fields=id,author_id,conversation_id,text,in_reply_to_user_id,geo,public_metrics,source," \
-                   "referenced_tweets&expansions=author_id,in_reply_to_user_id,referenced_tweets.id" \
+    tweet_fields = "tweet.fields=id,author_id,conversation_id,text,created_at,in_reply_to_user_id,geo,public_metrics" \
+                   ",source,referenced_tweets&expansions=author_id,in_reply_to_user_id,referenced_tweets.id" \
                    "&user.fields=name,username"
     url = TWITTER_API_URL + "tweets/search/recent?query={}&{}".format(query, tweet_fields)
     return url
