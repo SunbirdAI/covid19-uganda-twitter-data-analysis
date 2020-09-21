@@ -1,4 +1,4 @@
-from data_collection.twitterv2.db_utils import retrieve_tweets, fetch_user_by_id, fetch_tweet_by_id
+from data_collection.twitterv2.db_utils import retrieve_tweets, fetch_user_by_id, fetch_tweet_by_id, fetch_all_users
 import io
 import json
 
@@ -8,7 +8,7 @@ def filter_tweets_by_date(tweets, since_date):
 
 
 def get_users_name(user_id):
-    matching_users = fetch_user_by_id(user_id, "targeted")
+    matching_users = fetch_user_by_id(user_id)
     if len(matching_users) > 0:
         user = matching_users[0]
         return "{} @{}".format(user['name'], user['username'])
@@ -38,7 +38,7 @@ def create_tweet_text_for_annotation(tweet, original_tweet=False):
 
 
 def create_annotation_file_from_tweets(tweets_to_write):
-    with io.open("min_of_health_tweets.json", 'w', encoding='utf-8') as f:
+    with io.open("kcca_tweets.json", 'w', encoding='utf-8') as f:
         for tweet in tweets_to_write:
             text = create_tweet_text_for_annotation(tweet)
             labels = []
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     tweets = sorted(retrieve_tweets(mode="targeted"), key=lambda tweet: tweet['created_at'])
     # print("Number of tweets: {}".format(len(tweets)))
     # print(tweets[100])
-    print(create_tweet_text_for_annotation(tweets[100]))
+    # print(create_tweet_text_for_annotation(tweets[100]))
     print("========================================================")
     print(create_tweet_text_for_annotation(tweets[0]))
     # print(tweets[0]['created_at'])

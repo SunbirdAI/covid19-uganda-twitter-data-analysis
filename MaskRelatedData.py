@@ -48,6 +48,8 @@ def get_tweets(query_string):
     # Get more results
     get_more_results(tweets)
 
+    print(tweets)
+
     print("Finished retrieving '{}' tweets".format(query_string))
 
 
@@ -69,7 +71,7 @@ if __name__ == '__main__':
     accounts_list = ["from:MinOfHealthUG", "from:newvisionwire", "from:nbstv", "from:KagutaMuseveni"]
     # locations_list = ["place:Uganda", "bio_location:Kampala"]
 
-    _date_range = {"since": "2020-05-17", "until": "2020-05-25"}
+    _date_range = {"since": "2020-09-9", "until": "2020-09-11"}
 
     _query_string = create_query_string([words_list, hashtags_list, accounts_list], _date_range)
     print("Query: ", _query_string)

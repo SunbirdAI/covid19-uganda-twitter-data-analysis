@@ -45,18 +45,20 @@ def filter_ugandan_users(users):
     return ugandan_users
 
 
-def create_query(users=None, conversation_ids=None, entities=None):
+def create_query(users=None, conversation_ids=None, entities=None, include_retweets=False):
     """
     Creates the query string depending on the parameters given.
+    :param include_retweets: whether to include retweets
     :param users: list of users whose tweets to get.
     :param conversation_ids: the id of the conversation from which to get tweets
     :param entities: a list of entities (such as hashtags or annotations)
     :return: the query string
     """
+    retweets = " -is:retweet" if not include_retweets else ""
     if users is not None:
-        return " OR ".join("from:{}".format(user) for user in users) + " -is:retweet"
+        return " OR ".join("from:{}".format(user) for user in users) + retweets
     if conversation_ids is not None:
-        return " OR ".join("conversation_id:{}".format(conv_id) for conv_id in conversation_ids) + " -is:retweet"
+        return " OR ".join("conversation_id:{}".format(conv_id) for conv_id in conversation_ids) + retweets
     if entities is not None:
         return " OR ".join("entity:{}".format(entity) for entity in entities)
     return ""

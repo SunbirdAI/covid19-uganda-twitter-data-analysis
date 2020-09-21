@@ -114,6 +114,15 @@ def retrieve_tweets(mode="tweet"):
     return tweets
 
 
+def fetch_all_users(mode="tweet"):
+    user_cursor = get_mongo_db_collection(
+        DATABASE_NAME,
+        USERS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_USERS_COLLECTION
+    ).find({})
+    users = [user for user in user_cursor]
+    return users
+
+
 def fetch_user_by_id(user_id, mode="tweet"):
     user_cursor = get_mongo_db_collection(
         DATABASE_NAME,

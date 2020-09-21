@@ -4,10 +4,11 @@ import time
 
 
 def setup_query():
-    usernames = ["MinOfHealthUG", "JaneRuth_Aceng"]
-    save_new_users(usernames=usernames)
+    # usernames = ["MinOfHealthUG", "JaneRuth_Aceng"]
+    kcca_usernames = ["KCCASpox", "KCCAED", "KCCAUG"]
+    save_new_users(usernames=kcca_usernames, mode="targeted")
     # since_date = "2020-08-17"
-    query = create_query(usernames)
+    query = create_query(kcca_usernames, include_retweets=True)
     print("Collecting tweets")
     url = create_tweets_url(query)
     response = fetch_records(url, mode="targeted")
