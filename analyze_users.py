@@ -16,10 +16,12 @@ def find_users(number_followers=0):
 
 
 def create_json_users(users):
-    with io.open("10k_users.json", 'w', encoding='utf-8') as f:
+    with io.open("data_collection/twitterv2/10k_users.json", 'w', encoding='utf-8') as f:
         f.write(json.dumps({"users": users}, ensure_ascii=False, indent=5))
         f.close()
 
 
 if __name__ == '__main__':
-    create_json_users(find_users(10000))
+    _users = find_users(10000)
+    print("Number of users: {}".format(len(_users)))
+    create_json_users(_users)
