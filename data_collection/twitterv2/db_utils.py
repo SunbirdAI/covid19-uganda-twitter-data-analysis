@@ -2,11 +2,17 @@ from data_collection.db_utils import get_mongo_db_collection
 from pymongo import ASCENDING, errors
 
 DATABASE_NAME = "twitter_db"
-TWEETS_COLLECTION_NAME = "tweets_v2_collection"
-USERS_COLLECTION_NAME = "users_v2_collection"
 
-TARGETED_SEARCH_TWEETS_COLLECTION = "tweets_targeted"
-TARGETED_SEARCH_USERS_COLLECTION = "users_targeted"
+
+def get_collection_name(mode):
+    """
+    Returns the mongo-db collections to use based on the mode
+    :param mode: The data collection mode e.g moh, kcca
+    :return: the name of the collections to use
+    """
+    if mode == "collection":
+        return {"tweets": "tweets_v2_collection", "users": "users_v2_collection"}
+    return {"tweets": "tweets_{}".format(mode), "users": "users_{}".format(mode)}
 
 
 def setup_collection(db_name, collection_name):
@@ -41,32 +47,24 @@ def insert_records(collection, records):
     return successful_inserts
 
 
-def save_tweets(statuses):
+def save_tweets(statuses, collection_name):
     """
     Inserts the tweets into mongodb. Uses the insert_records function to ensure that there are no duplicates.
     :param statuses: tweets to insert
+    :param collection_name: the name of the collection into which to insert
     """
-    tweets_collection = setup_collection(DATABASE_NAME, TWEETS_COLLECTION_NAME)
+    tweets_collection = setup_collection(DATABASE_NAME, collection_name)
     return insert_records(tweets_collection, statuses)
 
 
-def save_users(users):
+def save_users(users, collection_name):
     """
     Saves users into the db.
     :param users: the users to add
+    :param collection_name: the name of the mongo-db collection into which to add
     """
-    users_collection = setup_collection(DATABASE_NAME, USERS_COLLECTION_NAME)
+    users_collection = setup_collection(DATABASE_NAME, collection_name)
     return insert_records(users_collection, users)
-
-
-def save_targeted_tweets(tweets):
-    tweets_col = setup_collection(DATABASE_NAME, TARGETED_SEARCH_TWEETS_COLLECTION)
-    return insert_records(tweets_col, tweets)
-
-
-def save_targeted_users(users):
-    users_col = setup_collection(DATABASE_NAME, TARGETED_SEARCH_USERS_COLLECTION)
-    return insert_records(users_col, users)
 
 
 def save_records(records, record_type, mode="collection"):
@@ -76,24 +74,27 @@ def save_records(records, record_type, mode="collection"):
     :param record_type: the type of record (either users or tweets)
     :param mode: the mode in which this function was called. Used to determine which collection
     """
+    collection_name = get_collection_name(mode)
     if record_type == "tweets":
-        return save_tweets(records) if mode == "collection" else save_targeted_tweets(records)
+        return save_tweets(records, collection_name[record_type])
     else:
-        return save_users(records) if mode == "collection" else save_targeted_users(records)
+        return save_users(records, collection_name[record_type])
 
 
-def count_records(record_type):
-    collection = setup_collection(DATABASE_NAME,
-                                  TWEETS_COLLECTION_NAME if record_type == "tweets" else USERS_COLLECTION_NAME)
+def count_records(record_type, mode="collection"):
+    collections = get_collection_name(mode)
+    collection_name = collections["tweets"] if record_type == "tweets" else collections["users"]
+    collection = setup_collection(DATABASE_NAME, collection_name)
     return collection.count_documents({})
 
 
-def random_15_users():
+def random_15_users(mode="collection"):
     """
     Gets 15 random users from the database
     :return: a list of usernames
     """
-    users_collection = setup_collection(DATABASE_NAME, USERS_COLLECTION_NAME)
+    collection_name = get_collection_name(mode)
+    users_collection = setup_collection(DATABASE_NAME, collection_name["users"])
     num_of_users = users_collection.count_documents({})
     rand_users = min(15, num_of_users)
     users_cursor = users_collection.aggregate([{"$sample": {"size": rand_users}}])
@@ -103,10 +104,11 @@ def random_15_users():
     return users
 
 
-def retrieve_tweets(mode="tweet"):
+def retrieve_tweets(mode="collection"):
+    collection_name = get_collection_name(mode)
     tweets_cursor = get_mongo_db_collection(
         DATABASE_NAME,
-        TWEETS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_TWEETS_COLLECTION
+        collection_name["tweets"]
     ).find()
     tweets = []
     for tweet in tweets_cursor:
@@ -114,28 +116,31 @@ def retrieve_tweets(mode="tweet"):
     return tweets
 
 
-def fetch_all_users(mode="tweet"):
+def fetch_all_users(mode="collection"):
+    collection_name = get_collection_name(mode)
     user_cursor = get_mongo_db_collection(
         DATABASE_NAME,
-        USERS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_USERS_COLLECTION
+        collection_name["users"]
     ).find({})
     users = [user for user in user_cursor]
     return users
 
 
-def fetch_user_by_id(user_id, mode="tweet"):
+def fetch_user_by_id(user_id, mode="collection"):
+    collection_name = get_collection_name(mode)
     user_cursor = get_mongo_db_collection(
         DATABASE_NAME,
-        USERS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_USERS_COLLECTION
+        collection_name["users"]
     ).find({'id': user_id})
     users = [user for user in user_cursor]
     return users
 
 
-def fetch_tweet_by_id(tweet_id, mode="tweet"):
+def fetch_tweet_by_id(tweet_id, mode="collection"):
+    collection_name = get_collection_name(mode)
     tweet_cursor = get_mongo_db_collection(
         DATABASE_NAME,
-        TWEETS_COLLECTION_NAME if mode == "tweet" else TARGETED_SEARCH_TWEETS_COLLECTION
+        collection_name["tweets"]
     ).find({'id': tweet_id})
     tweets = [tweet for tweet in tweet_cursor]
     return tweets
