@@ -2,7 +2,7 @@ from data_collection.twitterv2.db_utils import retrieve_tweets, fetch_user_by_id
 import io
 import json
 
-MODE = "moh"
+MODE = "influencers"
 
 
 def filter_tweets_by_date(tweets, since_date):
@@ -49,16 +49,40 @@ def create_annotation_file_from_tweets(tweets_to_write):
         f.close()
 
 
+def create_tweet_for_df(tweet):
+    user = get_users_name(tweet["author_id"])
+    df_tweet = {"username": user, "user_id": tweet["author_id"]}
+    fields = ["id", "text", "source", "created_at", "public_metrics",
+              "in_reply_to_user_id", "referenced_tweets", "labels"]
+    for field in fields:
+        if field in tweet:
+            df_tweet[field] = tweet[field]
+    return df_tweet
+
+
+def create_json_file(tweets_to_write):
+    with io.open("{}_analysis_tweets.json".format(MODE), 'w', encoding='utf-8') as f:
+        tweets_json = []
+        for tweet in tweets_to_write:
+            tweets_json.append(create_tweet_for_df(tweet))
+        f.write(json.dumps({"tweets": tweets_json}, ensure_ascii=False, indent=4))
+        f.close()
+
+
 if __name__ == '__main__':
     tweets = sorted(retrieve_tweets(mode=MODE), key=lambda tweet: tweet['created_at'])
     print("Number of tweets: {}".format(len(tweets)))
     # print(tweets[100])
     # print(create_tweet_text_for_annotation(tweets[100]))
     print("========================================================")
-    print(create_tweet_text_for_annotation(tweets[0]))
+    # tweet_to_display = 52
+    # print(create_tweet_text_for_annotation(tweets[tweet_to_display]))
+    # tweets[tweet_to_display].pop('_id')
+    # print(json.dumps(tweets[tweet_to_display], indent=4))
+
     # print(tweets[0]['created_at'])
     # print(tweets[-1]['created_at'])
-
+    create_json_file(tweets)
     # print(fetch_user_by_id("1249028558", mode="targeted"))
     # tweets = filter_tweets_by_date(tweets, "2020-08-17")
     # print("Number of tweets")

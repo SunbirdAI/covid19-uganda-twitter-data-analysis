@@ -3,11 +3,17 @@ from run_twitter_v2_data_collection import fetch_by_conversation_id, save_new_us
 import time
 
 
-MODE = "kcca"
+MODE = "influencers"
 
 USERNAMES_DICT = {
     "moh": ["MinOfHealthUG", "JaneRuth_Aceng", "WHOUganda"],
-    "kcca": ["KCCASpox", "KCCAED", "KCCAUG"]
+    "kcca": ["KCCASpox", "KCCAED", "KCCAUG"],
+    "influencers": ["Jude_Mugabi", "jshmugisha", "dhabonajob", "RitaStyles20", "douglaslwangaUG",
+                    "beewol", "MauriceMugisha", "Codongtho", "RichardTuwangye", "jordanshirumat2",
+                    "samsonkasumba", "akmartos1", "canarymugume", "frankWalusimbi", "rudende"],
+    "moh_engagement": ["lytz_kabibi", "GCICUganda", "the_afande", "dickson_namisi", "UgandaMediaCent",
+                       "kyobesarah", "SolomonMGrace2", "Luca12773", "chic_qa", "DarausBahikire",
+                       "IsaacK_06", "MwesigyeWalter", "DuncanAbigaba", " IDonnoWho", "JKacungira"]
 }
 
 
