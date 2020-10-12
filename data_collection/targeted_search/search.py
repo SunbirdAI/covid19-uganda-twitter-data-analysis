@@ -8,12 +8,12 @@ MODE = "influencers"
 USERNAMES_DICT = {
     "moh": ["MinOfHealthUG", "JaneRuth_Aceng", "WHOUganda"],
     "kcca": ["KCCASpox", "KCCAED", "KCCAUG"],
-    "influencers": ["Jude_Mugabi", "jshmugisha", "dhabonajob", "RitaStyles20", "douglaslwangaUG",
+    "influencers": ["Jude_Mugabi", "jshmugisha", "dhabonajob", "RitaStyles20", "DouglasLwangaUg",
                     "beewol", "MauriceMugisha", "Codongtho", "RichardTuwangye", "jordanshirumat2",
-                    "samsonkasumba", "akmartos1", "canarymugume", "frankWalusimbi", "rudende"],
+                    "SamsonKasumba", "akmartos1", "CanaryMugume", "FrankWALUSIMBI", "rudende"],
     "moh_engagement": ["lytz_kabibi", "GCICUganda", "the_afande", "dickson_namisi", "UgandaMediaCent",
                        "kyobesarah", "SolomonMGrace2", "Luca12773", "chic_qa", "DarausBahikire",
-                       "IsaacK_06", "MwesigyeWalter", "DuncanAbigaba", " IDonnoWho", "JKacungira"]
+                       "IsaacK_06", "MwesigyeWalter", "DuncanAbigaba", "IDonnoWho", "JKacungira"]
 }
 
 
@@ -46,6 +46,7 @@ def perform_search():
                 mode=MODE
             )
         start_index += max_ids
+        author_ids = set(author_ids)
         author_ids.update(set(response[2]))
 
         # Save the new users

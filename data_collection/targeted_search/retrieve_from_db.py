@@ -1,18 +1,37 @@
-from data_collection.twitterv2.db_utils import retrieve_tweets, fetch_user_by_id, fetch_tweet_by_id, fetch_all_users
+from data_collection.twitterv2.db_utils import retrieve_tweets, fetch_tweet_by_id, fetch_all_users
+from data_collection.targeted_search.search import USERNAMES_DICT
 import io
 import json
 
-MODE = "influencers"
+MODE = "moh_engagement"
 
 
 def filter_tweets_by_date(tweets, since_date):
     pass
 
 
-def get_users_name(user_id):
-    matching_users = fetch_user_by_id(user_id, mode=MODE)
-    if len(matching_users) > 0:
-        user = matching_users[0]
+def filter_relevant_users(tweets):
+    relevant_users = set(USERNAMES_DICT[MODE])
+    new_tweets = []
+    for tweet in tweets:
+        author_id = tweet['author_id']
+        if author_id in _users_index:
+            username = _users_index[author_id]['username']
+            if username in relevant_users:
+                new_tweets.append(tweet)
+    return new_tweets
+
+
+def create_user_index(users_list):
+    user_index = dict()
+    for user in users_list:
+        user_index[user['id']] = user
+    return user_index
+
+
+def get_users_name(user_id, users_index):
+    if user_id in users_index:
+        user = users_index[user_id]
         return "{} @{}".format(user['name'], user['username'])
     return user_id
 
@@ -20,7 +39,7 @@ def get_users_name(user_id):
 def create_tweet_text_for_annotation(tweet, original_tweet=False):
     # TweetID\nAuthorName @username\n\nTweetText\n\n(If reply)Replying to\n recurse(Original tweet)
     tweet_id_text = "TweetID: {}".format(tweet['id'])
-    user = "User: {}".format(get_users_name(tweet['author_id']))
+    user = "User: {}".format(get_users_name(tweet['author_id'], _users_index))
     date = "Date: {}".format(tweet['created_at'].replace("T", " at "))
     text = tweet['text']
 
@@ -50,7 +69,7 @@ def create_annotation_file_from_tweets(tweets_to_write):
 
 
 def create_tweet_for_df(tweet):
-    user = get_users_name(tweet["author_id"])
+    user = get_users_name(tweet["author_id"], _users_index)
     df_tweet = {"username": user, "user_id": tweet["author_id"]}
     fields = ["id", "text", "source", "created_at", "public_metrics",
               "in_reply_to_user_id", "referenced_tweets", "labels"]
@@ -70,19 +89,22 @@ def create_json_file(tweets_to_write):
 
 
 if __name__ == '__main__':
-    tweets = sorted(retrieve_tweets(mode=MODE), key=lambda tweet: tweet['created_at'])
-    print("Number of tweets: {}".format(len(tweets)))
+    _tweets = sorted(retrieve_tweets(mode=MODE), key=lambda tweet: tweet['created_at'])
+    _users_list = fetch_all_users(mode=MODE)
+    _users_index = create_user_index(_users_list)
+    _tweets = filter_relevant_users(_tweets)
+    print("Number of tweets: {}".format(len(_tweets)))
     # print(tweets[100])
     # print(create_tweet_text_for_annotation(tweets[100]))
     print("========================================================")
-    # tweet_to_display = 52
-    # print(create_tweet_text_for_annotation(tweets[tweet_to_display]))
-    # tweets[tweet_to_display].pop('_id')
-    # print(json.dumps(tweets[tweet_to_display], indent=4))
+    # tweet_to_display = len(_tweets) - 1
+    # print(create_tweet_text_for_annotation(_tweets[tweet_to_display]))
+    # _tweets[tweet_to_display].pop('_id')
+    # print(json.dumps(_tweets[tweet_to_display], indent=4))
 
     # print(tweets[0]['created_at'])
     # print(tweets[-1]['created_at'])
-    create_json_file(tweets)
+    create_json_file(_tweets)
     # print(fetch_user_by_id("1249028558", mode="targeted"))
     # tweets = filter_tweets_by_date(tweets, "2020-08-17")
     # print("Number of tweets")
