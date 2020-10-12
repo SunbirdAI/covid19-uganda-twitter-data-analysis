@@ -3,11 +3,15 @@ from data_collection.targeted_search.search import USERNAMES_DICT
 import io
 import json
 
-MODE = "moh_engagement"
+MODE = "moh"
 
 
 def filter_tweets_by_date(tweets, since_date):
-    pass
+    relevant_tweets = []
+    for tweet in tweets:
+        if tweet['created_at'] > since_date:
+            relevant_tweets.append(tweet)
+    return relevant_tweets
 
 
 def filter_relevant_users(tweets):
@@ -93,11 +97,12 @@ if __name__ == '__main__':
     _users_list = fetch_all_users(mode=MODE)
     _users_index = create_user_index(_users_list)
     _tweets = filter_relevant_users(_tweets)
+    _tweets = filter_tweets_by_date(_tweets, "2020-09-24")
     print("Number of tweets: {}".format(len(_tweets)))
     # print(tweets[100])
     # print(create_tweet_text_for_annotation(tweets[100]))
     print("========================================================")
-    # tweet_to_display = len(_tweets) - 1
+    # tweet_to_display = 0
     # print(create_tweet_text_for_annotation(_tweets[tweet_to_display]))
     # _tweets[tweet_to_display].pop('_id')
     # print(json.dumps(_tweets[tweet_to_display], indent=4))
