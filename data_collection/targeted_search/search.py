@@ -6,7 +6,7 @@ import time
 MODE = "moh"
 
 USERNAMES_DICT = {
-    "moh": ["MinOfHealthUG", "JaneRuth_Aceng", "WHOUganda"],
+    "moh": ["MinofHealthUG", "JaneRuth_Aceng", "WHOUganda"],
     "kcca": ["KCCASpox", "KCCAED", "KCCAUG"],
     "influencers": ["Jude_Mugabi", "jshmugisha", "dhabonajob", "RitaStyles20", "DouglasLwangaUg",
                     "beewol", "MauriceMugisha", "Codongtho", "RichardTuwangye", "jordanshirumat2",

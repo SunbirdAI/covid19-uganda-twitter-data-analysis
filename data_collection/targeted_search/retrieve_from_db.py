@@ -102,7 +102,7 @@ if __name__ == '__main__':
     # print(tweets[100])
     # print(create_tweet_text_for_annotation(tweets[100]))
     print("========================================================")
-    # tweet_to_display = 0
+    # tweet_to_display = len(_tweets) - 1
     # print(create_tweet_text_for_annotation(_tweets[tweet_to_display]))
     # _tweets[tweet_to_display].pop('_id')
     # print(json.dumps(_tweets[tweet_to_display], indent=4))
