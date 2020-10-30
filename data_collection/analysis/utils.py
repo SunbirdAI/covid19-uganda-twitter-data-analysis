@@ -8,6 +8,10 @@ from nltk.tokenize import word_tokenize
 
 from data_collection.analysis.constants import DATA_FOLDER, STOP_WORDS
 
+COVID_WORDS = ["covid", "covid19", "corona", "coronavirus", "mask", "masks", "lockdown",
+               "staysafe", "virus", "cov", "stayhome", "staysafeug", "socialdistance",
+               "washyourhands", "wearamask", "cases", "covid-19"]
+
 
 def get_tweets_from_json_file(mode: str) -> dict:
     data_file = DATA_FOLDER.joinpath(f"{mode}_analysis_tweets.json")
@@ -75,3 +79,18 @@ def create_pd_from_tweets(tweets: List[dict]) -> pd.DataFrame:
     df = pd.DataFrame([process_tweet(tweet) for tweet in filtered_tweets])
     df.set_index('created_time', inplace=True)
     return df
+
+
+def is_covid_related_tweet(tweet_words: List[str]) -> bool:
+    for word in COVID_WORDS:
+        if word in tweet_words:
+            return True
+    return False
+
+
+def covid_non_covid(words: List[str]) -> str:
+    return "COVID Tweets" if is_covid_related_tweet(words) else "NON-COVID Tweets"
+
+
+def filter_covid_tweets(tweets_df: pd.DataFrame) -> pd.DataFrame:
+    return tweets_df[tweets_df['words']].apply(lambda t_words: is_covid_related_tweet(t_words))
