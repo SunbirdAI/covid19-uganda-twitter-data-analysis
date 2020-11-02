@@ -3,7 +3,7 @@ from data_collection.targeted_search.search import USERNAMES_DICT
 import io
 import json
 
-MODE = "moh"
+MODE = "kcca"
 
 
 def filter_tweets_by_date(tweets, since_date):
@@ -97,7 +97,8 @@ if __name__ == '__main__':
     _users_list = fetch_all_users(mode=MODE)
     _users_index = create_user_index(_users_list)
     _tweets = filter_relevant_users(_tweets)
-    _tweets = filter_tweets_by_date(_tweets, "2020-09-24")
+    print(len(_tweets))
+    _tweets = filter_tweets_by_date(_tweets, "2020-10-09")
     print("Number of tweets: {}".format(len(_tweets)))
     # print(tweets[100])
     # print(create_tweet_text_for_annotation(tweets[100]))

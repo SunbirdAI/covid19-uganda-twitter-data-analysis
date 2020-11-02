@@ -92,5 +92,6 @@ def covid_non_covid(words: List[str]) -> str:
     return "COVID Tweets" if is_covid_related_tweet(words) else "NON-COVID Tweets"
 
 
-def filter_covid_tweets(tweets_df: pd.DataFrame) -> pd.DataFrame:
-    return tweets_df[tweets_df['words']].apply(lambda t_words: is_covid_related_tweet(t_words))
+def filter_covid_tweets(df: pd.DataFrame) -> pd.DataFrame:
+    # TODO: Figure out why a call to this function doesn't work in the notebook
+    return df[df['words'].apply(lambda t_words: is_covid_related_tweet(t_words))]
