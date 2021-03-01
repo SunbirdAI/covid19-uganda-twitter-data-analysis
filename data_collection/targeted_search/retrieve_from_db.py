@@ -2,8 +2,39 @@ from data_collection.twitterv2.db_utils import retrieve_tweets, fetch_tweet_by_i
 from data_collection.targeted_search.search import USERNAMES_DICT
 import io
 import json
+import re
+from nltk.tokenize import word_tokenize
+from typing import List
 
-MODE = "kcca"
+MODE = "moh_engagement"
+COVID_WORDS = ["covid", "covid19", "corona", "coronavirus", "mask", "masks", "lockdown",
+               "staysafe", "virus", "cov", "stayhome", "staysafeug", "socialdistance",
+               "washyourhands", "wearamask", "covid-19"]
+
+
+def get_tweet_words(tweet_text: str) -> List[str]:
+    """Clean up tweet"""
+    tweet = tweet_text.lower()
+    tweet = re.sub(r'((www\.[^\s]+)|(https?://[^\s]+))', 'URL', tweet)  # remove URLs
+    tweet = re.sub(r'@[^\s]+', 'AT_USER', tweet)  # remove usernames
+    tweet = re.sub(r'#([\w]+)', '', tweet)  # remove the # in #hashtag
+    tweet = word_tokenize(tweet)  # remove repeated characters (helloooooooo into hello)
+
+    return [word for word in tweet]
+
+
+def filter_covid_words(tweet_text: str):
+    words = get_tweet_words(tweet_text)
+    final_words = []
+    for word in words:
+        is_covid_word = False
+        for covid_word in COVID_WORDS:
+            is_covid_word = covid_word in word
+            if is_covid_word:
+                break
+        if not is_covid_word:
+            final_words.append(word)
+    return " ".join(final_words)
 
 
 def filter_tweets_by_date(tweets, since_date):
@@ -65,10 +96,10 @@ def create_tweet_text_for_annotation(tweet, original_tweet=False):
 def create_annotation_file_from_tweets(tweets_to_write):
     with io.open("{}_tweets.json".format(MODE), 'w', encoding='utf-8') as f:
         for tweet in tweets_to_write:
-            text = create_tweet_text_for_annotation(tweet)
-            labels = []
-            f.write(json.dumps({"text": text, "labels": labels}, ensure_ascii=False))
-            f.write("\n")
+            non_covid_text = filter_covid_words(tweet['text'])
+            if len(non_covid_text) > 0:
+                f.write(json.dumps({"id": tweet['id'], "text": non_covid_text, "labels": []}, ensure_ascii=False))
+                f.write("\n")
         f.close()
 
 
@@ -98,7 +129,7 @@ if __name__ == '__main__':
     _users_index = create_user_index(_users_list)
     _tweets = filter_relevant_users(_tweets)
     print(len(_tweets))
-    _tweets = filter_tweets_by_date(_tweets, "2020-10-09")
+    _tweets = filter_tweets_by_date(_tweets, "2020-10-30")
     print("Number of tweets: {}".format(len(_tweets)))
     # print(tweets[100])
     # print(create_tweet_text_for_annotation(tweets[100]))
@@ -114,4 +145,4 @@ if __name__ == '__main__':
     # print(fetch_user_by_id("1249028558", mode="targeted"))
     # tweets = filter_tweets_by_date(tweets, "2020-08-17")
     # print("Number of tweets")
-    # create_annotation_file_from_tweets(tweets)
+    # create_annotation_file_from_tweets(_tweets)

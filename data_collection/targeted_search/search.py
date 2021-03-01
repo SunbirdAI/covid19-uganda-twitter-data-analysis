@@ -3,7 +3,7 @@ from run_twitter_v2_data_collection import fetch_by_conversation_id, save_new_us
 import time
 
 
-MODE = "kcca"
+MODE = "moh_engagement"
 
 USERNAMES_DICT = {
     "moh": ["MinofHealthUG", "JaneRuth_Aceng", "WHOUganda"],

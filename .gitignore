@@ -7,3 +7,4 @@ mask_tweets_v4.json
 mask_tweetsv3.json
 *.csv
 __pycache__/
+*.json
