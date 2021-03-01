@@ -1,6 +1,5 @@
 import requests
 import os
-import json
 from dotenv import load_dotenv
 from data_collection.twitterv2.db_utils import save_records
 
@@ -8,13 +7,13 @@ from data_collection.twitterv2.db_utils import save_records
 TWITTER_API_URL = "https://api.twitter.com/2/"
 
 
-def auth():
+def auth(token_type):
     """
     Get the bearer token for authentication
     @:return bearer token
     """
     load_dotenv()
-    return os.getenv("TWITTER_BEARER_TOKEN")
+    return os.getenv(token_type)
 
 
 def create_headers(bearer_token):
@@ -74,7 +73,7 @@ def create_tweets_url(query):
 
 
 def fetch_records(url, record_type="tweets", mode="collection"):
-    bearer_token = auth()
+    bearer_token = auth("TWITTER_BEARER_TOKEN")
     headers = create_headers(bearer_token)
 
     records = []
