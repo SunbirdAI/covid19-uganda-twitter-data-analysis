@@ -8,3 +8,4 @@ mask_tweetsv3.json
 *.csv
 __pycache__/
 *.json
+*.log

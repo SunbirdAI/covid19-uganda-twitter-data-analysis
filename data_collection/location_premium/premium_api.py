@@ -1,15 +1,21 @@
 import requests
 import json
 import io
+import time
+import logging
 
 from datetime import datetime
 from data_collection.twitterv2.twitter_api import auth, create_headers, connect_to_endpoint
 from data_collection.twitterv2.db_utils import save_records
-import time
+from logging_utils import create_logger
 
 PREMIUM_API_URL = "https://api.twitter.com/1.1/tweets/search/fullarchive/"
 ACADEMIC_API_URL = "https://api.twitter.com/2/tweets/search/all"
 TWITTER_API_URL = "https://api.twitter.com/2/"
+logger = create_logger(__name__,
+                       filename="ugandan_tweets.log",
+                       logging_format="%(asctime)s: %(name)s: %(levelname)s: %(message)s",
+                       logging_level=logging.DEBUG)
 
 URL_CONFIG = {
     "premium": {
@@ -88,11 +94,12 @@ def make_data_request(url, api_type="academic"):
             tweets_so_far += len(tweets)
             tweets_saved = save_records(tweets, "tweets", "ugandan")
             if tweets_saved == 0:
-                print("No tweets saved!??")
+                logger.error("No tweets saved. Found duplicates")
             else:
-                print(f"Saved {tweets_saved} new tweets. Total tweets collected so far {tweets_so_far}. "
-                      f"Number of requests: {request_made}")
+                logger.info(f"Saved {tweets_saved} new tweets. Total tweets collected so far {tweets_so_far}. "
+                            f"Number of requests: {request_made}")
             tweets = []
+            print(f"Progress -> tweets collected: {tweets_so_far} requests made: {request_made}")
         if "meta" in results and "next_token" in results["meta"]:
             new_url = url + f"&next_token={results['meta']['next_token']}"
             results, status = connect_to_endpoint(new_url, headers)
@@ -100,23 +107,25 @@ def make_data_request(url, api_type="academic"):
                 request_made += 1
             elif status == 429:
                 while status == 429:
-                    print("Rate limit exceeded.")
-                    print(f"Requests made so far: {request_made}")
-                    print(f"Tweets collected so far: {tweets_so_far}")
-                    print("Waiting for 10 minutes")
+                    logger.info("Rate limit exceeded.")
+                    logger.info(f"Requests made so far: {request_made}")
+                    logger.info(f"Tweets collected so far: {tweets_so_far}")
+                    logger.info("Waiting for 10 minutes")
+                    print(f"Progress (rate limit exceeded) -> tweets collected: {tweets_so_far}"
+                          f" requests made: {request_made}")
                     time.sleep(600)
-                    print("Making request again...")
+                    logger.info("Making request again...")
                     results, status = connect_to_endpoint(new_url, headers)
                     if status == 200:
                         request_made += 1
             else:
-                print(f"Error {status}: {results}")
+                logger.info(f"Error {status}: {results}")
                 break
         else:
             break
-    print("Finished making request")
-    print(f"Tweets collected: {tweets_so_far}")
-    print(f"Total requests made: {request_made}")
+    logger.info("\n\nFinished making request")
+    logger.info(f"Tweets collected: {tweets_so_far}")
+    logger.info(f"Total requests made: {request_made}")
 
 
 def create_tweets_url(query, start_time, end_time, max_results=500, time_type="recent"):
