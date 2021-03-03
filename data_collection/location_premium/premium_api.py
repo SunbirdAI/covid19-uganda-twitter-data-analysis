@@ -4,6 +4,8 @@ import io
 
 from datetime import datetime
 from data_collection.twitterv2.twitter_api import auth, create_headers, connect_to_endpoint
+from data_collection.twitterv2.db_utils import save_records
+import time
 
 PREMIUM_API_URL = "https://api.twitter.com/1.1/tweets/search/fullarchive/"
 ACADEMIC_API_URL = "https://api.twitter.com/2/tweets/search/all"
@@ -76,8 +78,45 @@ def make_data_request(url, api_type="academic"):
     bearer_token = auth(URL_CONFIG[api_type]["token_name"])
     headers = create_headers(bearer_token)
     results, status = connect_to_endpoint(url, headers)
-    print(f"Status code: {status}")
-    print(json.dumps(results, indent=2))
+    tweets = []
+    tweets_so_far = 0
+    request_made = 1
+    while True:
+        if "data" in results:
+            tweets.extend(results["data"])
+        if len(tweets) >= 1000:
+            tweets_so_far += len(tweets)
+            tweets_saved = save_records(tweets, "tweets", "ugandan")
+            if tweets_saved == 0:
+                print("No tweets saved!??")
+            else:
+                print(f"Saved {tweets_saved} new tweets. Total tweets collected so far {tweets_so_far}. "
+                      f"Number of requests: {request_made}")
+            tweets = []
+        if "meta" in results and "next_token" in results["meta"]:
+            new_url = url + f"&next_token={results['meta']['next_token']}"
+            results, status = connect_to_endpoint(new_url, headers)
+            if status == 200:
+                request_made += 1
+            elif status == 429:
+                while status == 429:
+                    print("Rate limit exceeded.")
+                    print(f"Requests made so far: {request_made}")
+                    print(f"Tweets collected so far: {tweets_so_far}")
+                    print("Waiting for 10 minutes")
+                    time.sleep(600)
+                    print("Making request again...")
+                    results, status = connect_to_endpoint(new_url, headers)
+                    if status == 200:
+                        request_made += 1
+            else:
+                print(f"Error {status}: {results}")
+                break
+        else:
+            break
+    print("Finished making request")
+    print(f"Tweets collected: {tweets_so_far}")
+    print(f"Total requests made: {request_made}")
 
 
 def create_tweets_url(query, start_time, end_time, max_results=500, time_type="recent"):
@@ -97,10 +136,10 @@ if __name__ == '__main__':
 
     # For academic twitter
     _from_date = datetime(2020, 3, 1).strftime("%Y-%m-%dT%H:%M:%SZ")
-    _to_date = datetime(2020, 3, 2).strftime("%Y-%m-%dT%H:%M:%SZ")
+    _to_date = datetime(2021, 3, 1).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # make_counts_request("place_country:UG", _from_date, _to_date, api_type="academic")
     # make_data_request("place_country:UG since", _from_date, _to_date)
     _url = create_tweets_url("place_country:UG", start_time=_from_date,
-                             end_time=_to_date, max_results=10, time_type="all")
+                             end_time=_to_date, max_results=500, time_type="all")
     make_data_request(_url)
