@@ -167,3 +167,9 @@ def fetch_tweet_by_id(tweet_id, mode="collection"):
     ).find({'id': tweet_id})
     tweets = [tweet for tweet in tweet_cursor]
     return tweets
+
+
+def update_tweet(tweet_id, tweet_field_to_value, mode="collection"):
+    collection_name = get_collection_name(mode)
+    collection = get_mongo_db_collection(DATABASE_NAME, collection_name["tweets"])
+    collection.update_one({'id': tweet_id}, {"$set": tweet_field_to_value})
