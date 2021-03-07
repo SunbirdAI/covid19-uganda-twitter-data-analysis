@@ -58,8 +58,8 @@ def classify_tweets(tweets, batch_size):
         for prediction in predictions:
             update_db_record(prediction)
         total_tweets_done += len(batch_tweets)
-        if (i + 1) % 100 == 0:
-            logger.debug(f"Done classifying {len(batch_tweets)} tweets. Total tweets classified: {total_tweets_done}")
+        if i % 50 == 0:
+            logger.debug(f"Total tweets classified: {total_tweets_done}")
             calculate_time_elapsed()
 
 
