@@ -12,7 +12,7 @@ def get_collection_name(mode):
     """
     if mode == "collection":
         return {"tweets": "tweets_v2_collection", "users": "users_v2_collection"}
-    return {"tweets": "tweets_{}".format(mode), "users": "users_{}".format(mode)}
+    return {"tweets": "tweets_{}".format(mode), "users": "users_{}".format(mode), "places": f"places_{mode}"}
 
 
 def setup_collection(db_name, collection_name):
@@ -67,6 +67,17 @@ def save_users(users, collection_name):
     return insert_records(users_collection, users)
 
 
+def save_places(places, collection_name):
+    """
+    Saves places to the db
+    :param places: the places
+    :param collection_name: name of the mongo-db collectoin
+    :return:
+    """
+    places_collection = setup_collection(DATABASE_NAME, collection_name)
+    return insert_records(places_collection, places)
+
+
 def save_records(records, record_type, mode="collection"):
     """
     Saves records to the db depending on the record type.
@@ -77,6 +88,8 @@ def save_records(records, record_type, mode="collection"):
     collection_name = get_collection_name(mode)
     if record_type == "tweets":
         return save_tweets(records, collection_name[record_type])
+    elif record_type == "places":
+        return save_places(records, collection_name[record_type])
     else:
         return save_users(records, collection_name[record_type])
 
@@ -124,6 +137,16 @@ def fetch_all_users(mode="collection"):
     ).find({})
     users = [user for user in user_cursor]
     return users
+
+
+def fetch_all_places(mode="ugtweets"):
+    collection_name = get_collection_name(mode)
+    place_cursor = get_mongo_db_collection(
+        DATABASE_NAME,
+        collection_name["places"]
+    ).find({})
+    places = [place for place in place_cursor]
+    return places
 
 
 def fetch_user_by_id(user_id, mode="collection"):
