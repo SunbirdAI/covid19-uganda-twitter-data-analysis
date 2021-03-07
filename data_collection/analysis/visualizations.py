@@ -14,7 +14,8 @@ TITLES = {
     "moh": "MOH Accounts",
     "kcca": "KCCA Accounts",
     "influencers": "Influencers Accounts",
-    "moh_engagement": "Engagers Accounts"
+    "moh_engagement": "Engagers Accounts",
+    "ugtweets": "Ugandan Tweets"
 }
 
 
