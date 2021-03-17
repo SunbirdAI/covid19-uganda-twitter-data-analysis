@@ -4,6 +4,7 @@ import os
 import shutil
 import time
 from definitions import DATA_DIR
+from constants import DATA_FOLDER
 
 from ReadTweetsFromJson import grouper
 from data_collection.twitterv2.db_utils import retrieve_tweets
@@ -39,7 +40,7 @@ def write_covid_tweets_to_json(file, covid_tweets, total_tweets, total_covid_twe
         f.write(json.dumps(data, ensure_ascii=False, indent=5))
 
 
-def get_classified_covid_tweets(tweets, chunk_size=5000):
+def get_classified_covid_tweets(tweets, chunk_size=300000):
     covid_tweets = [tweet for tweet in tweets if tweet['prediction']['classification'] == 'Covid']
     print(f'Total classified tweets: {len(tweets)}')
     print(f'Total covid tweets: {len(covid_tweets)}')

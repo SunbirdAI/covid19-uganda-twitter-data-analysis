@@ -2,6 +2,7 @@ import json
 import io
 from dateutil import parser
 from datetime import datetime
+from constants import DATA_FOLDER
 
 
 def retrieve_file_tweets(filename):
@@ -23,17 +24,17 @@ def get_geo_ids(tweets):
 def all_geo_ids():
     geo_ids = set()
     for i in range(1, 99):
-        tweets = retrieve_file_tweets(f"data/ug_tweets_{i}.json")
+        tweets = retrieve_file_tweets(DATA_FOLDER.joinpath(f"ug_tweets_{i}.json)"))
         geo_ids = geo_ids.union(get_geo_ids(tweets))
         if i % 10 == 0:
             print(f"Unique geo ids so far {i}: {len(geo_ids)}")
     return geo_ids
 
 
-def get_all_tweets():
+def get_all_tweets(num_of_files=98):
     tweets = []
-    for i in range(1, 99):
-        tweets.extend(retrieve_file_tweets(f"data/ug_tweets_{i}.json"))
+    for i in range(1, num_of_files + 1):
+        tweets.extend(retrieve_file_tweets(DATA_FOLDER.joinpath(f"ug_tweets_{i}.json")))
     return tweets
 
 
